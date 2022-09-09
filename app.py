@@ -3,15 +3,46 @@ import streamlit as st
 import torch
 import string
 import sgpt
+import DCPCSE
+import SimCSE
+from io import StringIO 
 
 
 
 
 from transformers import BertTokenizer, BertForMaskedLM
 
-model_options=[ 'SGPT-125M', 'DCPCSE', 'SIMCSE']
+model_names = [
+            {"name":"SGPT-5.8B","model": "Muennighoff/SGPT-5.8B-weightedmean-msmarco-specb-bitfit" ,"desc":"#1 in Information retrieval on CQADupStack dataset (as     of 6 Sept 2022)","url":"https://arxiv.org/abs/2202.08904v5","mark":True,"obj":sgpt.SGPTModel()},
+            {"name":"DCPCSE","desc":"#1 in sentence similarity on SICK dataset (as of 6 Sept 2022)","url":"https://arxiv.org/abs/2203.06875v1","mark":True,"obj":DCPCSE.DCPCSEModel()},
+            {"name":"SIMCSE" ,"desc":"#2 in sentence similarity on SICK dataset (as of 6 Sept 2022)","url":"https://arxiv.org/abs/2104.08821v4","mark":True,"obj":SimCSE.SimCSEModel()},
+            {"name":"SGPT-1.3B","model": "Muennighoff/SGPT-1.3B-weightedmean-msmarco-specb-bitfit","desc":"Variant of SOTA model in information retrieval","url":"https://arxiv.org/abs/2202.08904v5","mark":False,"obj":sgpt.SGPTModel()},
+            {"name":"SGPT-125M", "model":"Muennighoff/SGPT-125M-weightedmean-nli-bitfit","desc":"Smaller variant of SOTA model in information retrieval","url":"https://arxiv.org/abs/2202.08904v5","mark":False,"obj":sgpt.SGPTModel()},
+            ]
 
-st.set_page_config(page_title='TWC - Compare state-of-the-art models for sentence similarity task', page_icon="logo.jpg", layout='centered', initial_sidebar_state='auto',
+
+example_file_display_names = [
+"Machine learning terms",
+"Customer feedback mixed with sentences unrelated to customer feedback"
+]
+
+example_file_names = {
+"Machine learning terms": "tests/small_test.txt",
+"Customer feedback mixed with sentences unrelated to customer feedback": "tests/larger_test.txt"
+}
+
+
+def construct_model_info_for_display():
+    options_arr  = []
+    markdown_str = "<div style=\"font-size:16px; color: #2f2f2f; text-align: left\"><br/><b>Models evaluated</b></div>"
+    for node in model_names:
+        options_arr .append(node["name"] + " - " +  node["desc"])
+        if (node["mark"] == True):
+            markdown_str += f"<div style=\"font-size:16px; color: #5f5f5f; text-align: left\">&nbsp;•&nbsp;&nbsp;<a href=\'{node['url']}\' target='_blank'>{node['name']}</a>&nbsp;&nbsp;&nbsp;&nbsp;{node['desc']} </div>"
+    return options_arr,markdown_str
+
+
+st.set_page_config(page_title='TWC - Compare state-of-the-art models for Sentence similarity task', page_icon="logo.jpg", layout='centered', initial_sidebar_state='auto',
             menu_items={
              'Get help': 'http://taskswithcode.com',
              'Report a Bug': "mailto:taskswithcode@gmail.com"})
@@ -25,13 +56,11 @@ with col:
 def load_model(model_name):
     try:
         ret_model = None
-        if (model_name == "SGPT-125M"):
-            ret_model =  sgpt.SGPTModel()
-        elif (model_name == "DCPCSE"):
-            ret_model =  sgpt.SGPTModel()
-        else:
-            ret_model =  sgpt.SGPTModel()
-        ret_model.init_model()
+        for node in model_names:
+            if (node["name"] == model_name):
+                ret_model = node["obj"]
+                ret_model.init_model(node["model"])
+        assert(ret_model is not None)
     except Exception as e:
         st.error("Unable to load model:" + model_name + " " +  str(e))
         pass
@@ -130,25 +159,27 @@ def main():
       
       with st.form('twc_form'):
 
-        uploaded_file = st.file_uploader("Step 1. Upload text file or choose example file. The first sentence in file is chosen as the main sentence", type=".txt")
+        uploaded_file = st.file_uploader("Step 1. Upload text file or choose example file. The first sentence in file is selected as the main sentence", type=".txt")
 
-        use_example_file = st.checkbox(
-                "Use example file", True, help="Use in-built example sentences file"
-                    )
-
+        selected_file_index = st.selectbox(label='Example files ',  
+                    options = example_file_display_names, index=0,  key = "twc_file")
         st.write("")
+        options_arr,markdown_str = construct_model_info_for_display()
         selected_model = st.selectbox(label='Step 2. Select Model',  
-                    options = model_options, index=0,  key = "twc_model1")
+                    options = options_arr, index=0,  key = "twc_model")
         st.write("")
         submit_button = st.form_submit_button('Run')
 
-        example_file1 = "sgpt/larger_test.txt"
-        sentences = open(example_file1).read().split("\n")[:-1]
         
         input_status_area = st.empty()
         display_area = st.empty()
         if submit_button:
             start = time.time()
+            if uploaded_file is not None:
+                sentences = StringIO(uploaded_file.getvalue().decode("utf-8")).read()
+            else:
+                sentences = open(example_file_names[selected_file_index]).read()
+            sentences = sentences.split("\n")[:-1]
             results = run_test(selected_model,sentences,display_area)
             display_area.empty()
             with display_area.container():
@@ -162,12 +193,7 @@ def main():
     st.error("Some error occurred during loading" + str(e))
     st.stop()  
 	
-  st.markdown("""
-    <div style="font-size:16px; color: #2f2f2f; text-align: left"><br/><b>Models evaluated</b></div>
-    <div style="font-size:16px; color: #5f5f5f; text-align: left">- <a href='https://arxiv.org/abs/2202.08904v5' target='_blank'>SGPT-125M.</a> #1 in Information retrieval on CQADupStack dataset (as of 6 Sept 2022)</div>
-    <div style="font-size:16px; color: #5f5f5f; text-align: left">- <a href='https://arxiv.org/abs/2203.06875v1' target='_blank'>DCPCSE.</a> #1 in sentence similarity on SICK dataset (as of 6 Sept 2022)</div>
-    <div style="font-size:16px; color: #5f5f5f; text-align: left">- <a href='https://arxiv.org/abs/2104.08821v4' target='_blank'>SIMCSE.</a> #2 in sentence similarity on SICK dataset (as of 6 Sept 2022)</div>
-  """, unsafe_allow_html=True)
+  st.markdown(markdown_str, unsafe_allow_html=True)
   
  
 
