@@ -6,6 +6,7 @@ import sgpt
 import DCPCSE
 import SimCSE
 from io import StringIO 
+import pdb
 
 
 
@@ -14,8 +15,8 @@ from transformers import BertTokenizer, BertForMaskedLM
 
 model_names = [
             {"name":"SGPT-5.8B","model": "Muennighoff/SGPT-5.8B-weightedmean-msmarco-specb-bitfit" ,"desc":"#1 in Information retrieval on CQADupStack dataset (as     of 6 Sept 2022)","url":"https://arxiv.org/abs/2202.08904v5","mark":True,"obj":sgpt.SGPTModel()},
-            {"name":"DCPCSE","desc":"#1 in sentence similarity on SICK dataset (as of 6 Sept 2022)","url":"https://arxiv.org/abs/2203.06875v1","mark":True,"obj":DCPCSE.DCPCSEModel()},
-            {"name":"SIMCSE" ,"desc":"#2 in sentence similarity on SICK dataset (as of 6 Sept 2022)","url":"https://arxiv.org/abs/2104.08821v4","mark":True,"obj":SimCSE.SimCSEModel()},
+            {"name":"DCPCSE","model":"DCPCSE/models","desc":"#1 in sentence similarity on SICK dataset (as of 6 Sept 2022)","url":"https://arxiv.org/abs/2203.06875v1","mark":True,"obj":DCPCSE.DCPCSEModel()},
+            {"name":"SIMCSE" ,"model":"princeton-nlp/sup-simcse-roberta-large","desc":"#2 in sentence similarity on SICK dataset (as of 6 Sept 2022)","url":"https://arxiv.org/abs/2104.08821v4","mark":True,"obj":SimCSE.SimCSEModel()},
             {"name":"SGPT-1.3B","model": "Muennighoff/SGPT-1.3B-weightedmean-msmarco-specb-bitfit","desc":"Variant of SOTA model in information retrieval","url":"https://arxiv.org/abs/2202.08904v5","mark":False,"obj":sgpt.SGPTModel()},
             {"name":"SGPT-125M", "model":"Muennighoff/SGPT-125M-weightedmean-nli-bitfit","desc":"Smaller variant of SOTA model in information retrieval","url":"https://arxiv.org/abs/2202.08904v5","mark":False,"obj":sgpt.SGPTModel()},
             ]
@@ -57,9 +58,10 @@ def load_model(model_name):
     try:
         ret_model = None
         for node in model_names:
-            if (node["name"] == model_name):
+            if (model_name.startswith(node["name"])):
                 ret_model = node["obj"]
                 ret_model.init_model(node["model"])
+                st.write("Init model complete:",node["model"])
         assert(ret_model is not None)
     except Exception as e:
         st.error("Unable to load model:" + model_name + " " +  str(e))
@@ -126,6 +128,7 @@ def compute_similarity(sentences,_model,model_name):
 
 def run_test(model_name,sentences,display_area):
     display_area.text("Loading model:" + model_name)
+    #load_model.clear()
     model = load_model(model_name)
     display_area.text("Model " + model_name  + " load complete")
     try:
