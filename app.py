@@ -5,6 +5,7 @@ import string
 from sgpt import SGPTModel
 from DCPCSE import DCPCSEModel
 from SimCSE import SimCSEModel
+from sentence_similarity_hf_model import HFModel
 from io import StringIO 
 import pdb
 import json
@@ -69,13 +70,27 @@ model_names = [
                 "model": "Muennighoff/SGPT-1.3B-weightedmean-msmarco-specb-bitfit",
                 "mark":False,
                 "class":"SGPTModel"},
+
+            {   "name":"sentence-transformers/all-MiniLM-L6-v2", 
+                "model":"sentence-transformers/all-MiniLM-L6-v2",
+                "fork_url":"https://github.com/taskswithcode/sentence_similarity_hf_model",
+                "orig_author_url":"https://github.com/UKPLab",
+                "orig_author":"Ubiquitous Knowledge Processing Lab",
+                "sota_info": {   
+                                 "task":"Nearly 4 million downloads from huggingface",
+                                 "sota_link":"https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2"
+                            },
+                "paper_url":"https://arxiv.org/abs/1908.10084",
+                "mark":True,
+                "class":"HFModel"},
+
             ]
 
 
 
 example_file_names = {
-"Machine learning terms (24 phrases)": "tests/small_test.txt",
-"Customer feedback mixed with noise (52 sentences)":"tests/larger_test.txt"
+"Machine learning terms (30+ phrases)": "tests/small_test.txt",
+"Customer feedback mixed with noise (50+ sentences)":"tests/larger_test.txt"
 }
 
 view_count_file = "view_count.txt"
@@ -103,7 +118,7 @@ def construct_model_info_for_display():
     for node in model_names:
         options_arr .append(node["name"])
         if (node["mark"] == True):
-            markdown_str += f"<div style=\"font-size:16px; color: #5f5f5f; text-align: left\">&nbsp;•&nbsp;Model:&nbsp;<a href=\'{node['paper_url']}\' target='_blank'>{node['name']}</a><br/>&nbsp;&nbsp;&nbsp;&nbsp;Official code release author:&nbsp;<a href=\'{node['orig_author_url']}\' target='_blank'>{node['orig_author']}</a><br/>&nbsp;&nbsp;&nbsp;&nbsp;SOTA:&nbsp;<a href=\'{node['sota_info']['sota_link']}\' target='_blank'>{node['sota_info']['task']}</a><br/>&nbsp;&nbsp;&nbsp;&nbsp;Forked <a href=\'{node['fork_url']}\' target='_blank'>code</a><br/><br/></div>"
+            markdown_str += f"<div style=\"font-size:16px; color: #5f5f5f; text-align: left\">&nbsp;•&nbsp;Model:&nbsp;<a href=\'{node['paper_url']}\' target='_blank'>{node['name']}</a><br/>&nbsp;&nbsp;&nbsp;&nbsp;Code released by:&nbsp;<a href=\'{node['orig_author_url']}\' target='_blank'>{node['orig_author']}</a><br/>&nbsp;&nbsp;&nbsp;&nbsp;Model info:&nbsp;<a href=\'{node['sota_info']['sota_link']}\' target='_blank'>{node['sota_info']['task']}</a><br/>&nbsp;&nbsp;&nbsp;&nbsp;Forked <a href=\'{node['fork_url']}\' target='_blank'>code</a><br/><br/></div>"
     return options_arr,markdown_str
 
 
@@ -208,7 +223,7 @@ def main():
         if submit_button:
             start = time.time()
             if uploaded_file is not None:
-                st.session_state["file_name"]  = uploaded_file.getvalue()
+                st.session_state["file_name"]  = uploaded_file.name
                 sentences = StringIO(uploaded_file.getvalue().decode("utf-8")).read()
             else:
                 st.session_state["file_name"]  = example_file_names[selected_file_index]
@@ -222,7 +237,7 @@ def main():
             results = run_test(selected_model,sentences,display_area,main_index - 1)
             display_area.empty()
             with display_area.container():
-                st.text(f"Response time - {time.time() - start:.2f} secs")
+                st.text(f"Response time - {time.time() - start:.2f} secs for {len(sentences)} sentences")
                 display_results(sentences,main_index - 1,results)
                 #st.json(results)
       st.download_button(
