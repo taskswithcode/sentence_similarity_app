@@ -2,9 +2,9 @@ import time
 import streamlit as st
 import torch
 import string
-import sgpt
-import DCPCSE
-import SimCSE
+from sgpt import SGPTModel
+from DCPCSE import DCPCSEModel
+from SimCSE import SimCSEModel
 from io import StringIO 
 import pdb
 
@@ -14,12 +14,14 @@ import pdb
 from transformers import BertTokenizer, BertForMaskedLM
 
 model_names = [
-            {"name":"SGPT-5.8B","model": "Muennighoff/SGPT-5.8B-weightedmean-msmarco-specb-bitfit" ,"desc":"#1 in Information retrieval on CQADupStack dataset (as     of 6 Sept 2022)","url":"https://arxiv.org/abs/2202.08904v5","mark":True,"obj":sgpt.SGPTModel()},
-            {"name":"DCPCSE","model":"DCPCSE/models","desc":"#1 in sentence similarity on SICK dataset (as of 6 Sept 2022)","url":"https://arxiv.org/abs/2203.06875v1","mark":True,"obj":DCPCSE.DCPCSEModel()},
-            {"name":"SIMCSE" ,"model":"princeton-nlp/sup-simcse-roberta-large","desc":"#2 in sentence similarity on SICK dataset (as of 6 Sept 2022)","url":"https://arxiv.org/abs/2104.08821v4","mark":True,"obj":SimCSE.SimCSEModel()},
-            {"name":"SGPT-1.3B","model": "Muennighoff/SGPT-1.3B-weightedmean-msmarco-specb-bitfit","desc":"Variant of SOTA model in information retrieval","url":"https://arxiv.org/abs/2202.08904v5","mark":False,"obj":sgpt.SGPTModel()},
-            {"name":"SGPT-125M", "model":"Muennighoff/SGPT-125M-weightedmean-nli-bitfit","desc":"Smaller variant of SOTA model in information retrieval","url":"https://arxiv.org/abs/2202.08904v5","mark":False,"obj":sgpt.SGPTModel()},
+            {"name":"SGPT-125M", "model":"Muennighoff/SGPT-125M-weightedmean-nli-bitfit","desc":"Smaller variant of SOTA model in information retrieval","url":"https://arxiv.org/abs/2202.08904v5","mark":True,"class":"SGPTModel"},
+            {"name":"SGPT-5.8B","model": "Muennighoff/SGPT-5.8B-weightedmean-msmarco-specb-bitfit" ,"desc":"#1 in Information retrieval on CQADupStack dataset (as     of 6 Sept 2022)","url":"https://arxiv.org/abs/2202.08904v5","mark":False,"class":"SGPTModel"},
+            {"name":"DCPCSE","model":"DCPCSE/models/large","desc":"#1 in sentence similarity on SICK dataset (as of 6 Sept 2022)","url":"https://arxiv.org/abs/2203.06875v1","mark":True,"class":"DCPCSEModel"},
+            {"name":"SIMCSE" ,"model":"princeton-nlp/sup-simcse-roberta-large","desc":"#2 in sentence similarity on SICK dataset (as of 6 Sept 2022)","url":"https://arxiv.org/abs/2104.08821v4","mark":True,"class":"SimCSEModel"},
+            {"name":"SIMCSE" ,"model":"princeton-nlp/sup-simcse-roberta-base","desc":"Smaller variant od #2 SOTA model in sentence similarity on SICK dataset (as of 6 Sept 2022)","url":"https://arxiv.org/abs/2104.08821v4","mark":False,"class":"SimCSEModel"},
+            {"name":"SGPT-1.3B","model": "Muennighoff/SGPT-1.3B-weightedmean-msmarco-specb-bitfit","desc":"Variant of SOTA model in information retrieval","url":"https://arxiv.org/abs/2202.08904v5","mark":False,"class":"SGPTModel"},
             ]
+
 
 
 example_file_display_names = [
@@ -59,67 +61,16 @@ def load_model(model_name):
         ret_model = None
         for node in model_names:
             if (model_name.startswith(node["name"])):
-                ret_model = node["obj"]
+                obj_class = globals()[node["class"]]
+                ret_model = obj_class()
                 ret_model.init_model(node["model"])
-                st.write("Init model complete:",node["model"])
         assert(ret_model is not None)
     except Exception as e:
         st.error("Unable to load model:" + model_name + " " +  str(e))
         pass
     return ret_model
 
-
-
   
-def decode(tokenizer, pred_idx, top_clean):
-  ignore_tokens = string.punctuation
-  tokens = []
-  for w in pred_idx:
-    token = ''.join(tokenizer.decode(w).split())
-    if token not in ignore_tokens and len(token) > 1 and not token.startswith('.') and not token.startswith('['):
-      #tokens.append(token.replace('##', ''))
-      tokens.append(token)
-  return '\n'.join(tokens[:top_clean])
-
-def encode(tokenizer, text_sentence, add_special_tokens=True):
-  
-  text_sentence = text_sentence.replace('<mask>', tokenizer.mask_token)
-
-  tokenized_text = tokenizer.tokenize(text_sentence) 
-  input_ids = torch.tensor([tokenizer.encode(text_sentence, add_special_tokens=add_special_tokens)])
-  if (tokenizer.mask_token in text_sentence.split()):
-    mask_idx = torch.where(input_ids == tokenizer.mask_token_id)[1].tolist()[0]
-  else:
-    mask_idx = 0
-  return input_ids, mask_idx,tokenized_text
-
-def get_all_predictions(text_sentence, model_name,top_clean=5):
-  bert_tokenizer = st.session_state['bert_tokenizer']
-  bert_model = st.session_state['bert_model']
-  top_k = st.session_state['top_k']
-  
-    # ========================= BERT =================================
-  input_ids, mask_idx,tokenized_text = encode(bert_tokenizer, text_sentence)
-   
-  with torch.no_grad():
-    predict = bert_model(input_ids)[0]
-  bert = decode(bert_tokenizer, predict[0, mask_idx, :].topk(top_k*2).indices.tolist(), top_clean)
-  cls = decode(bert_tokenizer, predict[0, 0, :].topk(top_k*2).indices.tolist(), top_clean)
-  
-  if ("[MASK]" in text_sentence or "<mask>" in text_sentence):
-    return {'Input sentence':text_sentence,'Tokenized text': tokenized_text, 'results_count':top_k,'Model':model_name,'Masked position': bert,'[CLS]':cls}
-  else:
-    return {'Input sentence':text_sentence,'Tokenized text': tokenized_text,'results_count':top_k,'Model':model_name,'[CLS]':cls}
-
-def get_bert_prediction(input_text,top_k,model_name):
-  try:
-    #input_text += ' <mask>'
-    res = get_all_predictions(input_text,model_name, top_clean=int(top_k))
-    return res
-  except Exception as error:
-    pass
-    
- 
 @st.experimental_memo
 def compute_similarity(sentences,_model,model_name):
     texts,embeddings = _model.compute_embeddings(sentences,is_file=False)
@@ -143,7 +94,7 @@ def run_test(model_name,sentences,display_area):
     return {}
     
 
-def output(main_sentence,results):
+def display_results(main_sentence,results):
     main_sent = f"<div style=\"font-size:16px; color: #2f2f2f; text-align: left\"><b>Main sentence:</b>&nbsp;&nbsp;{main_sentence}</div>"
     body_sent = []
     count = 1
@@ -187,7 +138,7 @@ def main():
             display_area.empty()
             with display_area.container():
                 st.text(f"Response time - {time.time() - start:.2f} secs")
-                output(sentences[0],results)
+                display_results(sentences[0],results)
                 #st.json(results)
       
       
