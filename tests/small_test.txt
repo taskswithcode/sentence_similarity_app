@@ -22,3 +22,9 @@ deep diving
 artificial snow
 shallow waters
 deep end 
+RELU
+sigmoid
+GELU
+RNN
+CNN
+Gaussian
