@@ -119,13 +119,16 @@ def construct_model_info_for_display():
         options_arr .append(node["name"])
         if (node["mark"] == True):
             markdown_str += f"<div style=\"font-size:16px; color: #5f5f5f; text-align: left\">&nbsp;•&nbsp;Model:&nbsp;<a href=\'{node['paper_url']}\' target='_blank'>{node['name']}</a><br/>&nbsp;&nbsp;&nbsp;&nbsp;Code released by:&nbsp;<a href=\'{node['orig_author_url']}\' target='_blank'>{node['orig_author']}</a><br/>&nbsp;&nbsp;&nbsp;&nbsp;Model info:&nbsp;<a href=\'{node['sota_info']['sota_link']}\' target='_blank'>{node['sota_info']['task']}</a><br/>&nbsp;&nbsp;&nbsp;&nbsp;Forked <a href=\'{node['fork_url']}\' target='_blank'>code</a><br/><br/></div>"
+    markdown_str += "<div style=\"font-size:12px; color: #9f9f9f; text-align: left\"><b>Note:</b> Uploaded files are loaded into non-persistent memory for the duration of the computation. They are not saved</div>"
     return options_arr,markdown_str
 
 
 st.set_page_config(page_title='TWC - Compare state-of-the-art models for Sentence Similarity task', page_icon="logo.jpg", layout='centered', initial_sidebar_state='auto',
             menu_items={
-             'Get help': 'http://taskswithcode.com',
-             'Report a Bug': "mailto:taskswithcode@gmail.com"})
+             'Get help':  "mailto:taskswithcode@gmail.com",
+             'Report a Bug': "mailto:taskswithcode@gmail.com",
+             'About': 'This app was created by taskswithcode. http://taskswithcode.com'
+              })
 col,pad = st.columns([85,15])
 
 with col:
@@ -174,8 +177,10 @@ def run_test(model_name,sentences,display_area,main_index):
 
     
 
-def display_results(orig_sentences,main_index,results):
-    main_sent = f"<div style=\"font-size:16px; color: #2f2f2f; text-align: left\"><b>Main sentence:</b>&nbsp;&nbsp;{orig_sentences[main_index]}</div>"
+def display_results(orig_sentences,main_index,results,response_info):
+    main_sent = f"<div style=\"font-size:14px; color: #2f2f2f; text-align: left\">{response_info}<br/><br/></div>"
+    main_sent += "<div style=\"font-size:14px; color: #6f6f6f; text-align: left\">Results sorted by cosine distance. Closest(1) to furthest(-1) away from main sentence</div>"
+    main_sent += f"<div style=\"font-size:16px; color: #2f2f2f; text-align: left\"><b>Main sentence:</b>&nbsp;&nbsp;{orig_sentences[main_index]}</div>"
     body_sent = []
     download_data = {}
     for key in results:
@@ -237,8 +242,8 @@ def main():
             results = run_test(selected_model,sentences,display_area,main_index - 1)
             display_area.empty()
             with display_area.container():
-                st.text(f"Response time - {time.time() - start:.2f} secs for {len(sentences)} sentences")
-                display_results(sentences,main_index - 1,results)
+                response_info = f"Response time - {time.time() - start:.2f} secs for {len(sentences)} sentences"
+                display_results(sentences,main_index - 1,results,response_info)
                 #st.json(results)
       st.download_button(
          label="Download results as json",
