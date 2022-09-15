@@ -11,6 +11,7 @@ import pdb
 import json
 
 
+MAX_INPUT = 100
 
 
 from transformers import BertTokenizer, BertForMaskedLM
@@ -119,7 +120,8 @@ def construct_model_info_for_display():
         options_arr .append(node["name"])
         if (node["mark"] == True):
             markdown_str += f"<div style=\"font-size:16px; color: #5f5f5f; text-align: left\">&nbsp;•&nbsp;Model:&nbsp;<a href=\'{node['paper_url']}\' target='_blank'>{node['name']}</a><br/>&nbsp;&nbsp;&nbsp;&nbsp;Code released by:&nbsp;<a href=\'{node['orig_author_url']}\' target='_blank'>{node['orig_author']}</a><br/>&nbsp;&nbsp;&nbsp;&nbsp;Model info:&nbsp;<a href=\'{node['sota_info']['sota_link']}\' target='_blank'>{node['sota_info']['task']}</a><br/>&nbsp;&nbsp;&nbsp;&nbsp;Forked <a href=\'{node['fork_url']}\' target='_blank'>code</a><br/><br/></div>"
-    markdown_str += "<div style=\"font-size:12px; color: #9f9f9f; text-align: left\"><b>Note:</b> Uploaded files are loaded into non-persistent memory for the duration of the computation. They are not saved</div>"
+    markdown_str += "<div style=\"font-size:12px; color: #9f9f9f; text-align: left\"><b>Note:</b><br/>•&nbsp;Uploaded files are loaded into non-persistent memory for the duration of the computation. They are not saved</div>"
+    markdown_str += f"<div style=\"font-size:12px; color: #9f9f9f; text-align: left\">•&nbsp;User uploaded file has a maximum limit of {MAX_INPUT} sentences.</div>"
     return options_arr,markdown_str
 
 
@@ -152,21 +154,31 @@ def load_model(model_name):
 
   
 @st.experimental_memo
-def compute_similarity(sentences,_model,model_name,main_index):
+def cached_compute_similarity(sentences,_model,model_name,main_index):
     texts,embeddings = _model.compute_embeddings(sentences,is_file=False)
     results = _model.output_results(None,texts,embeddings,main_index)
     return results
 
-def run_test(model_name,sentences,display_area,main_index):
+
+def uncached_compute_similarity(sentences,_model,model_name,main_index):
+    with st.spinner('Computing vectors for sentences'):
+        texts,embeddings = _model.compute_embeddings(sentences,is_file=False)
+        results = _model.output_results(None,texts,embeddings,main_index)
+    #st.success("Similarity computation complete")
+    return results
+
+def run_test(model_name,sentences,display_area,main_index,user_uploaded):
     display_area.text("Loading model:" + model_name)
-    #load_model.clear()
     model = load_model(model_name)
     display_area.text("Model " + model_name  + " load complete")
     try:
-        display_area.text("Computing vectors for sentences")
-        results = compute_similarity(sentences,model,model_name,main_index)
-        display_area.text("Similarity computation complete")
-        return results
+            if (user_uploaded):
+                results = uncached_compute_similarity(sentences,model,model_name,main_index)
+            else:
+                display_area.text("Computing vectors for sentences")
+                results = cached_compute_similarity(sentences,model,model_name,main_index)
+                display_area.text("Similarity computation complete")
+            return results
             
     except Exception as e:
         st.error("Some error occurred during prediction" + str(e))
@@ -237,9 +249,12 @@ def main():
             if (len(sentences) < main_index):
                 main_index = len(sentences)
                 st.info("Selected sentence index is larger than number of sentences in file. Truncating to " + str(main_index)) 
+            if (len(sentences) > MAX_INPUT):
+                st.info(f"Input sentence count exceeds maximum sentence limit. First {MAX_INPUT} out of {len(sentences)} sentences chosen")
+                sentences = sentences[:MAX_INPUT]
             st.session_state["model_name"] = selected_model
             st.session_state["main_index"] = main_index
-            results = run_test(selected_model,sentences,display_area,main_index - 1)
+            results = run_test(selected_model,sentences,display_area,main_index - 1,(uploaded_file is not None))
             display_area.empty()
             with display_area.container():
                 response_info = f"Response time - {time.time() - start:.2f} secs for {len(sentences)} sentences"
