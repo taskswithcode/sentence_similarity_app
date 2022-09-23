@@ -1,0 +1,143 @@
+[
+
+            {   "name":"sentence-transformers/all-MiniLM-L6-v2", 
+                "model":"sentence-transformers/all-MiniLM-L6-v2",
+                "fork_url":"https://github.com/taskswithcode/sentence_similarity_hf_model",
+                "orig_author_url":"https://github.com/UKPLab",
+                "orig_author":"Ubiquitous Knowledge Processing Lab",
+                "sota_info": {   
+                                 "task":"Over 3.8  million downloads from Huggingface",
+                                 "sota_link":"https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2"
+                            },
+                "paper_url":"https://arxiv.org/abs/1908.10084",
+                "mark":"True",
+                "class":"HFModel"},
+            {   "name":"sentence-transformers/paraphrase-MiniLM-L6-v2", 
+                "model":"sentence-transformers/paraphrase-MiniLM-L6-v2",
+                "fork_url":"https://github.com/taskswithcode/sentence_similarity_hf_model",
+                "orig_author_url":"https://github.com/UKPLab",
+                "orig_author":"Ubiquitous Knowledge Processing Lab",
+                "sota_info": {   
+                                 "task":"Over 2 million downloads from Huggingface",
+                                 "sota_link":"https://huggingface.co/sentence-transformers/paraphrase-MiniLM-L6-v2"
+                            },
+                "paper_url":"https://arxiv.org/abs/1908.10084",
+                "mark":"True",
+                "class":"HFModel"},
+            {   "name":"sentence-transformers/bert-base-nli-mean-tokens", 
+                "model":"sentence-transformers/bert-base-nli-mean-tokens",
+                "fork_url":"https://github.com/taskswithcode/sentence_similarity_hf_model",
+                "orig_author_url":"https://github.com/UKPLab",
+                "orig_author":"Ubiquitous Knowledge Processing Lab",
+                "sota_info": {   
+                                 "task":"Over 700,000 downloads from Huggingface",
+                                 "sota_link":"https://huggingface.co/sentence-transformers/bert-base-nli-mean-tokens"
+                            },
+                "paper_url":"https://arxiv.org/abs/1908.10084",
+                "mark":"True",
+                "class":"HFModel"},
+            {   "name":"sentence-transformers/all-mpnet-base-v2", 
+                "model":"sentence-transformers/all-mpnet-base-v2",
+                "fork_url":"https://github.com/taskswithcode/sentence_similarity_hf_model",
+                "orig_author_url":"https://github.com/UKPLab",
+                "orig_author":"Ubiquitous Knowledge Processing Lab",
+                "sota_info": {   
+                                 "task":"Over 500,000 downloads from Huggingface",
+                                 "sota_link":"https://huggingface.co/sentence-transformers/all-mpnet-base-v2"
+                            },
+                "paper_url":"https://arxiv.org/abs/1908.10084",
+                "mark":"True",
+                "class":"HFModel"},
+            {   "name":"sentence-transformers/all-MiniLM-L12-v2",
+                "model":"sentence-transformers/all-MiniLM-L12-v2",
+                "fork_url":"https://github.com/taskswithcode/sentence_similarity_hf_model",
+                "orig_author_url":"https://github.com/UKPLab",
+                "orig_author":"Ubiquitous Knowledge Processing Lab",
+                "sota_info": {   
+                                 "task":"Over 500,000 downloads from Huggingface",
+                                 "sota_link":"https://huggingface.co/sentence-transformers/all-MiniLM-L12-v2"
+                            },
+                "paper_url":"https://arxiv.org/abs/1908.10084",
+                "mark":"True",
+                "class":"HFModel"},
+
+            {   "name":"SGPT-125M", 
+                "model":"Muennighoff/SGPT-125M-weightedmean-nli-bitfit",
+                "fork_url":"https://github.com/taskswithcode/sgpt",
+                "orig_author_url":"https://github.com/Muennighoff",
+                "orig_author":"Niklas Muennighoff",
+                "sota_info": {   
+                                 "task":"#1 in multiple information retrieval & search tasks(smaller variant)",
+                                 "sota_link":"https://paperswithcode.com/paper/sgpt-gpt-sentence-embeddings-for-semantic"
+                            },
+                "paper_url":"https://arxiv.org/abs/2202.08904v5",
+                "mark":"True",
+                "class":"SGPTModel"},
+            {   "name":"SGPT-1.3B",
+                "model": "Muennighoff/SGPT-1.3B-weightedmean-msmarco-specb-bitfit",
+                "fork_url":"https://github.com/taskswithcode/sgpt",
+                "orig_author_url":"https://github.com/Muennighoff",
+                "orig_author":"Niklas Muennighoff",
+                "sota_info": {   
+                                 "task":"#1 in multiple information retrieval & search tasks(smaller variant)",
+                                 "sota_link":"https://paperswithcode.com/paper/sgpt-gpt-sentence-embeddings-for-semantic"
+                            },
+                "paper_url":"https://arxiv.org/abs/2202.08904v5",
+                "alt_url":"http://www.taskswithcode.com/sentence_similarity/",
+                "mark":"True",
+                "class":"SGPTModel"},
+            {   "name":"SGPT-5.8B",
+                "model": "Muennighoff/SGPT-5.8B-weightedmean-msmarco-specb-bitfit" ,
+                "fork_url":"https://github.com/taskswithcode/sgpt",
+                "orig_author_url":"https://github.com/Muennighoff",
+                "orig_author":"Niklas Muennighoff",
+                "alt_url":"http://www.taskswithcode.com/sentence_similarity/",
+                "sota_info": {   
+                                 "task":"#1 in multiple information retrieval & search tasks",
+                                 "sota_link":"https://paperswithcode.com/paper/sgpt-gpt-sentence-embeddings-for-semantic"
+                            },
+                "paper_url":"https://arxiv.org/abs/2202.08904v5",
+                "mark":"True",
+                "class":"SGPTModel"},
+
+            {   "name":"SIMCSE-large" ,
+                "model":"princeton-nlp/sup-simcse-roberta-large",
+                "fork_url":"https://github.com/taskswithcode/SimCSE",
+                "orig_author_url":"https://github.com/princeton-nlp",
+                "orig_author":"Princeton Natural Language Processing",
+                "alt_url":"http://www.taskswithcode.com/sentence_similarity/",
+                "sota_info": {   
+                                 "task":"Within top 10 in multiple semantic textual similarity tasks",
+                                 "sota_link":"https://paperswithcode.com/paper/simcse-simple-contrastive-learning-of"
+                            },
+                "paper_url":"https://arxiv.org/abs/2104.08821v4",
+                "mark":"True",
+                "class":"SimCSEModel","sota_link":"https://paperswithcode.com/sota/semantic-textual-similarity-on-sick"},
+
+            {  "name":"SIMCSE-base" ,
+                "model":"princeton-nlp/sup-simcse-roberta-base",
+                "fork_url":"https://github.com/taskswithcode/SimCSE",
+                "orig_author_url":"https://github.com/princeton-nlp",
+                "orig_author":"Princeton Natural Language Processing",
+                "sota_info": {   
+                                 "task":"Within top 10 in multiple semantic textual similarity tasks(smaller variant)",
+                                 "sota_link":"https://paperswithcode.com/paper/simcse-simple-contrastive-learning-of"
+                            },
+                "paper_url":"https://arxiv.org/abs/2104.08821v4",
+                "mark":"True",
+                "class":"SimCSEModel","sota_link":"https://paperswithcode.com/sota/semantic-textual-similarity-on-sick"},
+            {   "name":"DCPCSE-large",
+                "model":"DCPCSE/models/large",
+                "fork_url":"https://github.com/taskswithcode/DCPCSE",
+                "orig_author_url":"https://github.com/YJiangcm",
+                "orig_author":"Jiang Yuxin 姜宇心",
+                "sota_info": {   
+                                 "task":"#1 in multiple semantic textual similarity tasks",
+                                 "sota_link":"https://paperswithcode.com/paper/deep-continuous-prompt-for-contrastive-1"
+                            },
+                "paper_url":"https://arxiv.org/abs/2203.06875v1",
+                "mark":"True",
+                "class":"DCPCSEModel","sota_link":"https://paperswithcode.com/sota/semantic-textual-similarity-on-sick"}
+
+
+            ]
