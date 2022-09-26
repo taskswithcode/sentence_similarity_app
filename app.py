@@ -207,7 +207,7 @@ def app_main(app_mode,example_files,model_name_files):
       
       with st.form('twc_form'):
 
-        step1_line = "Step 1. Upload text file(one sentence in a line) or choose an example text file below"
+        step1_line = "Upload text file(one sentence in a line) or choose an example text file below"
         if (app_mode ==  DOC_RETRIEVAL):
             step1_line += ". The first line is treated as the query"
         uploaded_file = st.file_uploader(step1_line, type=".txt")
@@ -216,7 +216,7 @@ def app_main(app_mode,example_files,model_name_files):
                     options = list(dict.keys(example_file_names)), index=0,  key = "twc_file")
         st.write("")
         options_arr,markdown_str = construct_model_info_for_display(model_names)
-        selection_label = 'Step 2. Select Model'
+        selection_label = 'Select Model'
         selected_model = st.selectbox(label=selection_label,  
                     options = options_arr, index=0,  key = "twc_model")
         st.write("")
@@ -224,7 +224,7 @@ def app_main(app_mode,example_files,model_name_files):
         hf_link_str = "<div style=\"font-size:12px; color: #9f9f9f; text-align: left\"><a href='https://huggingface.co/models?pipeline_tag=sentence-similarity' target = '_blank'>List of Huggingface sentence similarity models</a><br/><br/><br/></div>"
         st.markdown(hf_link_str, unsafe_allow_html=True)
         if (app_mode == SEM_SIMILARITY):
-            main_index = st.number_input('Step 3. Enter index of sentence in file to make it the main sentence',value=1,min_value = 1)
+            main_index = st.number_input('Enter index of sentence in file to make it the main sentence',value=1,min_value = 1)
         else:
             main_index = 1
         st.write("")
