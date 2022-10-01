@@ -5,3 +5,4 @@ App to compare state-of-the-art models for sentence similarity task
 
 _For testinng large models use [this link on taskswithcode site](http://taskswithcode.com/sentence_similarity/) because Hugging Face often times out on large models_
 
+<img src="picture.png" width="600">
