@@ -137,7 +137,67 @@
                             },
                 "paper_url":"https://arxiv.org/abs/2203.06875v1",
                 "mark":"True",
-                "class":"DCPCSEModel","sota_link":"https://paperswithcode.com/sota/semantic-textual-similarity-on-sick"}
+                "class":"DCPCSEModel","sota_link":"https://paperswithcode.com/sota/semantic-textual-similarity-on-sick"},
+            {  "name":"GPT-3-175B (text-similarity-davinci-001)" ,
+                "model":"text-similarity-davinci-001",
+                "fork_url":"https://openai.com/api/",
+                "orig_author_url":"https://openai.com/api/",
+                "orig_author":"OpenAI",
+                "sota_info": {   
+                                 "task":"GPT-3 achieves strong zero-shot and few-shot performance on many NLP datasets etc.",
+                                 "sota_link":"https://paperswithcode.com/method/gpt-3"
+                            },
+                "paper_url":"https://arxiv.org/abs/2005.14165v4",
+                "mark":"True",
+                "custom_load":"False",
+                "Note":"Custom file upload requires OpenAI API access to create embeddings. For API access, use this link ",
+                "alt_url":"https://openai.com/api/",
+                "class":"OpenAIModel","sota_link":"https://arxiv.org/abs/2005.14165v4"},
+            {  "name":"GPT-3-6.7B (text-similarity-curie-001)" ,
+                "model":"text-similarity-curie-001",
+                "fork_url":"https://openai.com/api/",
+                "orig_author_url":"https://openai.com/api/",
+                "orig_author":"OpenAI",
+                "sota_info": {   
+                                 "task":"GPT-3 achieves strong zero-shot and few-shot performance on many NLP datasets etc.",
+                                 "sota_link":"https://paperswithcode.com/method/gpt-3"
+                            },
+                "paper_url":"https://arxiv.org/abs/2005.14165v4",
+                "mark":"True",
+                "custom_load":"False",
+                "Note":"Custom file upload requires OpenAI API access to create embeddings. For API access, use this link ",
+                "alt_url":"https://openai.com/api/",
+                "class":"OpenAIModel","sota_link":"https://arxiv.org/abs/2005.14165v4"},
+            {  "name":"GPT-3-1.3B (text-similarity-babbage-001)" ,
+                "model":"text-similarity-babbage-001",
+                "fork_url":"https://openai.com/api/",
+                "orig_author_url":"https://openai.com/api/",
+                "orig_author":"OpenAI",
+                "sota_info": {   
+                                 "task":"GPT-3 achieves strong zero-shot and few-shot performance on many NLP datasets etc.",
+                                 "sota_link":"https://paperswithcode.com/method/gpt-3"
+                            },
+                "paper_url":"https://arxiv.org/abs/2005.14165v4",
+                "mark":"True",
+                "custom_load":"False",
+                "Note":"Custom file upload requires OpenAI API access to create embeddings. For API access, use this link ",
+                "alt_url":"https://openai.com/api/",
+                "class":"OpenAIModel","sota_link":"https://arxiv.org/abs/2005.14165v4"},
+            {  "name":"GPT-3-350M (text-similarity-ada-001)" ,
+                "model":"text-similarity-ada-001",
+                "fork_url":"https://openai.com/api/",
+                "orig_author_url":"https://openai.com/api/",
+                "orig_author":"OpenAI",
+                "sota_info": {   
+                                 "task":"GPT-3 achieves strong zero-shot and few-shot performance on many NLP datasets etc.",
+                                 "sota_link":"https://paperswithcode.com/method/gpt-3"
+                            },
+                "paper_url":"https://arxiv.org/abs/2005.14165v4",
+                "mark":"True",
+                "custom_load":"False",
+                "Note":"Custom file upload requires OpenAI API access to create embeddings. For API access, use this link ",
+                "alt_url":"https://openai.com/api/",
+                "class":"OpenAIModel","sota_link":"https://arxiv.org/abs/2005.14165v4"}
 
 
             ]

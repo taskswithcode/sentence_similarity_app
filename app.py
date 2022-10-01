@@ -5,6 +5,7 @@ import string
 from sgpt import SGPTModel
 from DCPCSE import DCPCSEModel
 from SimCSE import SimCSEModel
+from openai_api import OpenAIModel
 from sentence_similarity_hf_model import HFModel
 from io import StringIO 
 import pdb
@@ -64,7 +65,7 @@ def get_views(action):
 
 def construct_model_info_for_display(model_names):
     options_arr  = []
-    markdown_str = f"<div style=\"font-size:16px; color: #2f2f2f; text-align: left\"><br/><b>Models evaluated ({len(model_names)})</b><br/><i>These are either state-of-the-art or the most downloaded models on Huggingface</i></div>"
+    markdown_str = f"<div style=\"font-size:16px; color: #2f2f2f; text-align: left\"><br/><b>Models evaluated ({len(model_names)})</b><br/><i>The selected models satisfy one or more of the following (1) state-of-the-art (2) the most downloaded models on Hugging Face (3) Large Language Models (e.g. GPT-3)</i></div>"
     markdown_str += f"<div style=\"font-size:2px; color: #2f2f2f; text-align: left\"><br/></div>"
     for node in model_names:
         options_arr .append(node["name"])
@@ -82,8 +83,9 @@ def construct_model_info_for_display(model_names):
 
 st.set_page_config(page_title='TWC - Compare popular/state-of-the-art models for sentence similarity using sentence embeddings', page_icon="logo.jpg", layout='centered', initial_sidebar_state='auto',
             menu_items={
-             'About': 'This app was created by taskswithcode. http://taskswithcode.com'
-             
+             'About': 'This app was created by taskswithcode. http://taskswithcode.com',
+             'Get help': 'mailto:twc@taskswithcode.com',
+             'Report a Bug': "mailto:twc@taskswithcode.com"
               })
 col,pad = st.columns([85,15])
 
@@ -100,21 +102,21 @@ def load_model(model_name,model_class,load_model_name):
         ret_model.init_model(load_model_name)
         assert(ret_model is not None)
     except Exception as e:
-        st.error("Unable to load model:" + model_name + " " + load_model_name + " " +  str(e))
+        st.error(f"Unable to load model class:{model_class} model_name: {model_name} load_model_name: {load_model_name}   {str(e)}")
         pass
     return ret_model
 
   
 @st.experimental_memo
-def cached_compute_similarity(sentences,_model,model_name,main_index):
-    texts,embeddings = _model.compute_embeddings(sentences,is_file=False)
+def cached_compute_similarity(input_file_name,sentences,_model,model_name,main_index):
+    texts,embeddings = _model.compute_embeddings(input_file_name,sentences,is_file=False)
     results = _model.output_results(None,texts,embeddings,main_index)
     return results
 
 
-def uncached_compute_similarity(sentences,_model,model_name,main_index):
+def uncached_compute_similarity(input_file_name,sentences,_model,model_name,main_index):
     with st.spinner('Computing vectors for sentences'):
-        texts,embeddings = _model.compute_embeddings(sentences,is_file=False)
+        texts,embeddings = _model.compute_embeddings(input_file_name,sentences,is_file=False)
         results = _model.output_results(None,texts,embeddings,main_index)
     #st.success("Similarity computation complete")
     return results
@@ -126,7 +128,7 @@ def get_model_info(model_names,model_name):
             return node,model_name
     return get_model_info(model_names,DEFAULT_HF_MODEL)
 
-def run_test(model_names,model_name,sentences,display_area,main_index,user_uploaded,custom_model):
+def run_test(model_names,model_name,input_file_name,sentences,display_area,main_index,user_uploaded,custom_model):
     display_area.text("Loading model:" + model_name)
     #Note. model_name may get mapped to new name in the call below for custom models
     orig_model_name = model_name
@@ -138,14 +140,18 @@ def run_test(model_names,model_name,sentences,display_area,main_index,user_uploa
     if ("Note" in model_info):
         fail_link = f"{model_info['Note']} [link]({model_info['alt_url']})"
         display_area.write(fail_link)
+    if (user_uploaded and "custom_load" in model_info and model_info["custom_load"] == "False"):
+        fail_link = f"{model_info['Note']} [link]({model_info['alt_url']})"
+        display_area.write(fail_link)
+        return {"error":fail_link}
     model = load_model(model_name,model_info["class"],load_model_name)
     display_area.text("Model " + model_name  + " load complete")
     try:
             if (user_uploaded):
-                results = uncached_compute_similarity(sentences,model,model_name,main_index)
+                results = uncached_compute_similarity(input_file_name,sentences,model,model_name,main_index)
             else:
                 display_area.text("Computing vectors for sentences")
-                results = cached_compute_similarity(sentences,model,model_name,main_index)
+                results = cached_compute_similarity(input_file_name,sentences,model,model_name,main_index)
                 display_area.text("Similarity computation complete")
             return results
             
@@ -184,10 +190,14 @@ def display_results(orig_sentences,main_index,results,response_info,app_mode,mod
 
 
 def init_session():
-    st.session_state["download_ready"] = None    
-    st.session_state["model_name"] = "ss_test"
-    st.session_state["main_index"] = 1
-    st.session_state["file_name"] = "default"
+    if ("model_name" not in st.session_state):
+        print("Performing init session")
+        st.session_state["download_ready"] = None    
+        st.session_state["model_name"] = "ss_test"
+        st.session_state["main_index"] = 1
+        st.session_state["file_name"] = "default"
+    else:
+        print("****Skipping init session")
  
 def app_main(app_mode,example_files,model_name_files):
   init_session()
@@ -220,8 +230,8 @@ def app_main(app_mode,example_files,model_name_files):
         selected_model = st.selectbox(label=selection_label,  
                     options = options_arr, index=0,  key = "twc_model")
         st.write("")
-        custom_model_selection = st.text_input("Model not listed above? Type any Huggingface sentence similarity model name ", "",key="custom_model")
-        hf_link_str = "<div style=\"font-size:12px; color: #9f9f9f; text-align: left\"><a href='https://huggingface.co/models?pipeline_tag=sentence-similarity' target = '_blank'>List of Huggingface sentence similarity models</a><br/><br/><br/></div>"
+        custom_model_selection = st.text_input("Model not listed above? Type any Hugging Face sentence similarity model name ", "",key="custom_model")
+        hf_link_str = "<div style=\"font-size:12px; color: #9f9f9f; text-align: left\"><a href='https://huggingface.co/models?pipeline_tag=sentence-similarity' target = '_blank'>List of Hugging Face sentence similarity models</a><br/><br/><br/></div>"
         st.markdown(hf_link_str, unsafe_allow_html=True)
         if (app_mode == SEM_SIMILARITY):
             main_index = st.number_input('Enter index of sentence in file to make it the main sentence',value=1,min_value = 1)
@@ -255,15 +265,18 @@ def app_main(app_mode,example_files,model_name_files):
             st.session_state["model_name"] = run_model
             st.session_state["main_index"] = main_index
                   
-            results = run_test(model_names,run_model,sentences,display_area,main_index - 1,(uploaded_file is not None),(len(custom_model_selection) != 0))
+            results = run_test(model_names,run_model,st.session_state["file_name"],sentences,display_area,main_index - 1,(uploaded_file is not None),(len(custom_model_selection) != 0))
             display_area.empty()
             with display_area.container():
-                device = 'GPU' if torch.cuda.is_available() else 'CPU'
-                response_info = f"Computation time on {device}: {time.time() - start:.2f} secs for {len(sentences)} sentences"
-                if (len(custom_model_selection) != 0):
-                    st.info("Custom model overrides model selection in step 2 above. So please clear the custom model text box to choose models from step 2")
-                display_results(sentences,main_index - 1,results,response_info,app_mode,run_model)
-                #st.json(results)
+                if ("error" in results):
+                    st.error(results["error"])
+                else:
+                    device = 'GPU' if torch.cuda.is_available() else 'CPU'
+                    response_info = f"Computation time on {device}: {time.time() - start:.2f} secs for {len(sentences)} sentences"
+                    if (len(custom_model_selection) != 0):
+                        st.info("Custom model overrides model selection in step 2 above. So please clear the custom model text box to choose models from step 2")
+                    display_results(sentences,main_index - 1,results,response_info,app_mode,run_model)
+                    #st.json(results)
       st.download_button(
          label="Download results as json",
          data= st.session_state["download_ready"] if st.session_state["download_ready"] != None else "",
