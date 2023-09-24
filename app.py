@@ -17,7 +17,7 @@ import sys
 from transformers import BertTokenizer, BertForMaskedLM
 
 
-MAX_INPUT = 100
+MAX_INPUT = 5000
 
 SEM_SIMILARITY="1"
 DOC_RETRIEVAL="2"
@@ -81,7 +81,7 @@ def construct_model_info_for_display(model_names):
     return options_arr,markdown_str
 
 
-st.set_page_config(page_title='TWC - Compare popular/state-of-the-art models for sentence similarity using sentence embeddings', page_icon="logo.jpg", layout='centered', initial_sidebar_state='auto',
+st.set_page_config(page_title='TasksWithCode', page_icon="logo.png", layout='centered', initial_sidebar_state='auto',
             menu_items={
              'About': 'This app was created by taskswithcode. http://taskswithcode.com',
              'Get help': 'mailto:twc@taskswithcode.com',
